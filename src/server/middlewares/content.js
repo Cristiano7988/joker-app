@@ -1,16 +1,26 @@
-const { rest, readItems } = require("@directus/sdk");
+const { rest, readItems, readItem } = require("@directus/sdk");
 
 const pages = (req, res, next) => {
     const directus = req.public_access.with(rest());
 
     directus
-        .request(readItems("pages?filter[status]=published"))
+        .request(readItems("templates", { filter: { status: "published" } }))
         .then(pages => req.pages = pages)
         .then(() => next());
 }
 
+const components = (req, res, next) => {
+    const directus = req.public_access.with(rest());
+    const { id } = req.params;
+    directus
+        .request(readItem("components", id, { filter: { status: "published" } }))
+        .then(components => req.components = components)
+        .then(() => next());
+}
+
 const content = {
-    pages
+    pages,
+    components
 }
 
 module.exports = content;
