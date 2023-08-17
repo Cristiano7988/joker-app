@@ -50,7 +50,7 @@ const handleData = async (array, defaultText) => {
   const contentsCollections = [];
 
   const data = await new Promise(resolve => {
-    array.map(({ source }, index) => {
+    array.map(({ source, code }, index) => {
       const url = [
         process.env.REACT_APP_LOCAL_NODE_SERVER,
         "collections",
@@ -60,6 +60,11 @@ const handleData = async (array, defaultText) => {
       fetch(url)
         .then(r => r.json())
         .then(data => {
+          if (code?.match(`dataComingFromTheCollection`)) {
+            code = code.replace('`dataComingFromTheCollection`', JSON.stringify(data));
+            data = eval(code);
+          }
+
           contentsCollections[source] = data;
           if ((array.length - 1) == index) resolve(contentsCollections);
         });
