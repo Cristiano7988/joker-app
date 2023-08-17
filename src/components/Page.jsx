@@ -32,7 +32,7 @@ const handleSection = async (type, key, props) => {
 }
 
 const updateNewText = (data, text) => {
-  const response = data.map(item => {
+  const response = data?.map(item => {
     let textWithData = Object.getOwnPropertyNames(item);
 
     textWithData = textWithData.reduce((currentValue, nextKey) => {
@@ -50,14 +50,22 @@ const handleData = async (array, defaultText) => {
   const contentsCollections = [];
 
   const data = await new Promise(resolve => {
-    array.map(({ source, code }, index) => {
+    array.map(({ source, code, filters }, index) => {
       const url = [
         process.env.REACT_APP_LOCAL_NODE_SERVER,
         "collections",
         source
       ].join("/");
 
-      fetch(url)
+      if (!filters) filters = [{ key: "status", value: "published",  condition: "_eq" }];
+
+      fetch(url, {
+        method: "POST",
+        body: JSON.stringify(filters),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
         .then(r => r.json())
         .then(data => {
           if (code?.match(`dataComingFromTheCollection`)) {

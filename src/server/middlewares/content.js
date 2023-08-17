@@ -31,8 +31,15 @@ const collections = (req, res, next) => {
     const directus = req.public_access.with(rest());
     const { name } = req.params;
 
+    let filter = null;
+    if (req?.body?.length) {
+        const handleFilters = [];
+        req.body.map(({key, value, condition}) => handleFilters[key] = {[condition]: value})
+        filter = Object.assign({}, handleFilters);
+    }
+
     directus
-        .request(readItems(name, { filter: { status: "published" } }))
+        .request(readItems(name, { filter }))
         .then(items => req.items = items)
         .then(() => next());
 }

@@ -30,7 +30,7 @@ module.exports = (app) => {
         content.modules
     );
 
-    app.get(
+    app.post(
         "/collections/:name",
         [
             static_access,
