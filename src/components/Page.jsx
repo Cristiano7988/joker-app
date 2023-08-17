@@ -1,5 +1,36 @@
 import { useEffect } from "react";
 
+const handleSection = async (type, key, props) => {
+  const updatedSection = await new Promise(resolveSection => {
+    const url = [
+      process.env.REACT_APP_LOCAL_NODE_SERVER,
+      "content",
+      "public",
+      type,
+      key
+    ].join("/");
+
+    fetch(url)
+      .then(r => r.json())
+      .then(async ({ data, content }) => {
+        // Here we update the content inside the scope of the custom tag
+        if (data) content = await new Promise(async resolve => {
+          const updatedContent = await handleData(data, content);
+          resolve(updatedContent);
+        });
+
+        // Here we update the content outside the scope of the custom tag (based in the props passed in Templates Collection)
+        const tags = ['{{$', '}}'];
+        props?.map(({ key, value }) => content = content.replaceAll(tags.join(key), value));
+
+        resolveSection(content);
+      })
+      .catch(error => console.log(error));
+  })
+
+  return updatedSection;
+}
+
 const updateNewText = (data, text) => {
   const response = data.map(item => {
     let textWithData = Object.getOwnPropertyNames(item);
@@ -24,7 +55,7 @@ const handleData = async (array, defaultText) => {
         process.env.REACT_APP_LOCAL_NODE_SERVER,
         "collections",
         source
-      ].join("/"); 
+      ].join("/");
 
       fetch(url)
         .then(r => r.json())
@@ -35,9 +66,9 @@ const handleData = async (array, defaultText) => {
     });
   });
 
-  const newText = array.reduce(( template, { source, name }) => {
-    const tag = new RegExp(`<${name}>([\\s\\S]*?)<\/${name}>`, 'g');
-    let scopes = template.split(tag);
+  const newText = array.reduce((updatedText, { source, name }) => {
+    const customtag = new RegExp(`<${name}>([\\s\\S]*?)<\/${name}>`, 'g');
+    let scopes = updatedText.split(customtag);
 
     return scopes.map((text, index) => index % 2 == 1 ? updateNewText(data[source], text) : text).join("");
   }, defaultText);
@@ -51,49 +82,11 @@ export const Page = ({ ...page }) => {
 
     const sections = [];
     page.sections.map(async (section, sectionIndex) => {
-      const { component, module } = section;
-      const newSection = await new Promise(resolveSection => {
-        if (component) {
-          const url = [
-            process.env.REACT_APP_LOCAL_NODE_SERVER,
-            "content",
-            "public",
-            "components",
-            component.key
-          ].join("/");
+      const [property] = Object.getOwnPropertyNames(section);
 
-          fetch(url)
-            .then(r => r.json())
-            .then(component => {
-              const tags = ['{{$', '}}'];
-              section?.props?.map(({ key, value }) => component.content = component.content.replaceAll(tags.join(key), value));
-              resolveSection(component.content);
-            })
-            .catch(error => console.log(error));
+      let sectionUpdated = await handleSection(property.concat("s"), section[property].key, section.props);
 
-        } else if (module) {
-          const url = [
-            process.env.REACT_APP_LOCAL_NODE_SERVER,
-            "content",
-            "public",
-            "modules",
-            module.key
-          ].join("/");
-
-          fetch(url)
-            .then(r => r.json())
-            .then(async ({ data, content }) => {
-              const moduleUpdated = await new Promise(async resolve => {
-                const updatedContent = await handleData(data, content);
-                resolve(updatedContent);
-              });
-              resolveSection(moduleUpdated);
-            })
-            .catch(error => console.log(error));
-        }
-      });
-
-      sections[sectionIndex] = newSection;
+      sections[sectionIndex] = sectionUpdated;
       document.querySelector(".contents-of-the-template").innerHTML = sections.join("");
     });
   }, []);
