@@ -95,7 +95,7 @@ export const Page = ({ ...page }) => {
 
     const sections = [];
     page.sections.map(async (section, sectionIndex) => {
-      const [property] = Object.getOwnPropertyNames(section);
+      const [property] = Object.getOwnPropertyNames(section).filter(item => item != 'props');
 
       let sectionUpdated = await handleSection(property.concat("s"), section[property].key, section.props);
 
