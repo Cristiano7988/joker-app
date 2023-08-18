@@ -15,7 +15,7 @@ const handleSection = async (type, key, props) => {
       .then(async ({ data, content }) => {
         // Here we update the content inside the scope of the custom tag
         if (data) content = await new Promise(async resolve => {
-          const updatedContent = await handleData(data, content);
+          const updatedContent = await handleData(data, content, props);
           resolve(updatedContent);
         });
 
@@ -32,7 +32,9 @@ const handleSection = async (type, key, props) => {
 }
 
 const updateNewText = (data, text) => {
-  const response = data?.map(item => {
+  if (!data) return text;
+
+  const response = data.map(item => {
     let textWithData = Object.getOwnPropertyNames(item);
 
     textWithData = textWithData.reduce((currentValue, nextKey) => {
@@ -46,11 +48,18 @@ const updateNewText = (data, text) => {
   return response.join("");
 }
 
-const handleData = async (array, defaultText) => {
+const handleData = async (array, defaultText, props) => {
   const contentsCollections = [];
 
   const data = await new Promise(resolve => {
-    array.map(({ source, code, filters }, index) => {
+    array.map(({ name, source, filters, pre_code, code }, index) => {
+      try {
+        eval(pre_code);
+      } catch (error) {
+        console.log(error);
+        return resolve("");
+      }
+
       const url = [
         process.env.REACT_APP_LOCAL_NODE_SERVER,
         "collections",
@@ -82,7 +91,7 @@ const handleData = async (array, defaultText) => {
   const newText = array.reduce((updatedText, { source, name }) => {
     const customtag = new RegExp(`<${name}>([\\s\\S]*?)<\/${name}>`, 'g');
     let scopes = updatedText.split(customtag);
-
+    
     return scopes.map((text, index) => index % 2 == 1 ? updateNewText(data[source], text) : text).join("");
   }, defaultText);
 
