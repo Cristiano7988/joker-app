@@ -1,17 +1,8 @@
 const { static_access } = require("../middlewares/auth");
-const { pages, components, modules, collections } = require("../middlewares/content");
+const { page, nestedPage, components, modules, collections } = require("../middlewares/content");
 const content = require("../controllers/content");
 
 module.exports = (app) => {
-    app.get(
-        "/content/public/pages",
-        [
-            static_access,
-            pages
-        ],
-        content.public
-    );
-
     app.get(
         "/content/public/components/:id",
         [
@@ -28,6 +19,16 @@ module.exports = (app) => {
             modules
         ],
         content.modules
+    );
+
+    app.get(
+        "/page/:slug",
+        [
+            static_access,
+            page,
+            nestedPage
+        ],
+        content.page
     );
 
     app.post(
