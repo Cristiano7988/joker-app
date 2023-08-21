@@ -39,4 +39,12 @@ module.exports = (app) => {
         ],
         content.collections
     );
+
+    app.post(
+        "/contacts",
+        [
+            static_access
+        ],
+        content.contacts
+    );
 }
