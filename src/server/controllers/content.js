@@ -23,8 +23,11 @@ exports.forms = (req, res) => {
 exports.contacts = (req, res) => {
     const directus = req.public_access.with(rest());
 
+    const { store_in } = req.body
+    delete req.body.store_in;
+
     directus
-        .request(createItem('contacts', req.body))
+        .request(createItem(store_in, req.body))
         .then(response => res.send(response))
         .catch(error => res.status(500).send(error));
 }

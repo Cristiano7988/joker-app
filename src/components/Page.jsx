@@ -46,9 +46,9 @@ export const Page = ({ __html }) => {
 
                         if (errors) {
                             // Add error messages for each input
-                            errors.map(({ extensions, message }) => {
+                            errors.map(({ extensions, message, code }) => {
                                 const { field } = extensions;
-                                elements[field].parentElement.innerHTML += `<span class="input-error">${message}</span>`;
+                                if (code != "FORBIDDEN") elements[field].parentElement.innerHTML += `<span class="input-error">${message}</span>`;
                             });
 
                             createCopy("error", data, form);
