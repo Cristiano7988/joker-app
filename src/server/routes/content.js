@@ -40,6 +40,14 @@ module.exports = (app) => {
         content.collections
     );
 
+    app.get(
+        "/forms",
+        [
+            static_access
+        ],
+        content.forms
+    );
+
     app.post(
         "/contacts",
         [

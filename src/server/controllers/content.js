@@ -16,6 +16,10 @@ exports.page = (req, res) => {
     res.send(req.page);
 }
 
+exports.forms = (req, res) => {
+    res.send(req.forms);
+}
+
 exports.contacts = (req, res) => {
     const directus = req.public_access.with(rest());
 
@@ -24,4 +28,3 @@ exports.contacts = (req, res) => {
         .then(response => res.send(response))
         .catch(error => res.status(500).send(error));
 }
-
