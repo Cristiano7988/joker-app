@@ -46,8 +46,8 @@ export const Page = ({ __html }) => {
 
                         if (errors) {
                             // Add error messages for each input
-                            errors.map(({ extensions, message, code }) => {
-                                const { field } = extensions;
+                            errors.map(({ extensions, message }) => {
+                                const { field, code } = extensions;
                                 if (code != "FORBIDDEN") elements[field].parentElement.innerHTML += `<span class="input-error">${message}</span>`;
                             });
 
@@ -58,7 +58,7 @@ export const Page = ({ __html }) => {
                             // Clear inputs
                             data.map(element => {
                                 const [[key, value]] = Object.entries(element);
-                                elements[key].value = "";
+                                if (!/store_in/.test(key)) elements[key].value = "";
                             })
                         }
                     })
