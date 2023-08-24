@@ -55,4 +55,12 @@ module.exports = (app) => {
         ],
         content.contacts
     );
+
+    app.put(
+        "/contacts",
+        [
+            static_access
+        ],
+        content.updateContacts
+    );
 }

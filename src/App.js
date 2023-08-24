@@ -88,6 +88,8 @@ const handleData = async (array, defaultText, props) => {
       })
         .then(r => r.json())
         .then(data => {
+          if (source == "forms") defaultText = defaultText.replace("<form", `<form data-content='${JSON.stringify(data)}'`);
+
           if (code?.match(`dataComingFromTheCollection`)) {
             code = code.replace('`dataComingFromTheCollection`', JSON.stringify(data));
             data = eval(code);

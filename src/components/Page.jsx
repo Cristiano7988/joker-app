@@ -31,13 +31,21 @@ export const Page = ({ __html }) => {
                 form.querySelector(".form-success.copy, .form-error.copy")?.remove();
 
                 // Submit form
-                const { action, method, elements } = e.target;
-                const config = { method };
-                if (method.toLowerCase() == "post") {
+                const { action, elements, dataset } = e.target;
+                let { content } = dataset;
+                const [{ method, filters, store_in }] = JSON.parse(content);
+                let config = {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: { store_in, filters }
+                };
+
+                if (method !== "GET") {
                     var data = Array.from(elements).map(({name, value}) => (name && value) && ({[name]: value})).filter(Boolean);
-                    config.body = JSON.stringify(Object.assign({}, ...data));
-                    config.headers = { 'Content-Type': 'application/json' };
+                    config.body = Object.assign(config.body, ...data);
                 }
+
+                config.body = JSON.stringify(config.body);
 
                 fetch(action, config)
                     .then(r => r.json())
