@@ -113,6 +113,39 @@ const handleData = async (array, defaultText, props) => {
 
 const App = () => {
   const [page, setPage] = useState("");
+  const [countQueries, setCountQueries] = useState(0);
+  const [queryTemplate, setQueryTemplate] = useState("");
+
+  const getResult = async (result) => {
+    const name = "result";
+    const customtag = new RegExp(`<${name}>([\\s\\S]*?)<\/${name}>`, 'g');
+    let scopes = page.split(customtag);
+
+    const pageUpdated = scopes.map((html, index) => {
+      const tagScope = index % 2 == 1;
+
+      if (!tagScope) return html;
+      if (!countQueries) setQueryTemplate(html);
+      else html = queryTemplate;
+
+      const updatedHTML = result.reduce((updatedText, item) => {
+        const formatedItem = Object.entries(item);
+
+        const copia = formatedItem.reduce((updatedCopy, [key, value]) => {
+          const regex = new RegExp(`({{\\$${key}}})`, 'g');
+          return updatedCopy.replaceAll(regex, value);
+        }, html);
+
+        return updatedText.concat(copia);
+      }, html);
+
+      return [`<${name}>`, `</${name}>`].join(updatedHTML);
+    }).join("");
+
+    setCountQueries(countQueries + 1);
+    setPage(pageUpdated);
+  }
+
   useEffect(() => {
 
     let [parent = 'home', nestedPage] = window.location.pathname.split("/").filter(Boolean);
@@ -141,12 +174,12 @@ const App = () => {
         });
       })
       .catch(error => {
-        console.log({ error })
+        console.log({ error });
       })
     
   }, []);
 
-  if (page) return <Page __html={page} />
+  if (page) return <Page getResult={getResult} page={page} />
 }
 
 export default App;

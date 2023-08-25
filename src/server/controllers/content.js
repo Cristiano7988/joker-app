@@ -20,7 +20,7 @@ exports.forms = (req, res) => {
     res.send(req.forms);
 }
 
-exports.contacts = (req, res) => {
+exports.createContacts = (req, res) => {
     const directus = req.public_access.with(rest());
 
     const { store_in } = req.body
@@ -69,5 +69,40 @@ exports.updateContacts = (req, res) => {
             } else return response.map(contact => directus.request(updateItem(store_in, contact.id, req.body)));
         })
         .then(response => res.send(response))
+        .catch(error => res.status(500).send(error));
+}
+
+exports.contacts = (req, res) => {
+    const directus = req.public_access.with(rest());
+
+    const { store_in } = req.query
+    delete req.query.store_in;
+
+    const formatedFilter = Object.entries(req.query).map(([key, value]) => ({
+        [key]: {
+            _eq: value
+        }
+    }));
+
+    const filter = Object.assign({}, ...formatedFilter);
+
+    directus
+        .request(readItems(store_in, { filter }))
+        .then(response => {
+            if (!response.length) {
+                const errors = Object.entries(req.query).map(
+                    item => ({
+                        extensions: {
+                            code: "NOT_FOUND",
+                            field: [item],
+                            type: '_eq'
+                        },
+                        message: ["No", [item], "was found."].join(" ")
+                    })
+                );
+
+                res.status(500).send({ errors });
+            } else res.send(response);
+        })
         .catch(error => res.status(500).send(error));
 }

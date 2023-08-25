@@ -53,7 +53,7 @@ module.exports = (app) => {
         [
             static_access
         ],
-        content.contacts
+        content.createContacts
     );
 
     app.put(
@@ -62,5 +62,13 @@ module.exports = (app) => {
             static_access
         ],
         content.updateContacts
+    );
+
+    app.get(
+        "/contacts",
+        [
+            static_access
+        ],
+        content.contacts
     );
 }
