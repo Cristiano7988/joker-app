@@ -133,7 +133,7 @@ const App = () => {
 
         const copia = formatedItem.reduce((updatedCopy, [key, value]) => {
           const regex = new RegExp(`({{\\$${key}}})`, 'g');
-          return updatedCopy.replaceAll(regex, value);
+          return updatedCopy.replaceAll(regex, value || "");
         }, html);
 
         return updatedText.concat(copia);

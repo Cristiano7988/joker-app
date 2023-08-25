@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 const createCopy = (type, data, formName) => {
-    const form = document.querySelector(`[name=${formName}]`);
+    const form = document.querySelector(`form[name=${formName}]`);
     const text = form.querySelector(".form-" + type)?.textContent;
     if (text == "null") return;
     const updatedText = data.reduce((text, item) => {
@@ -22,7 +22,7 @@ const createCopy = (type, data, formName) => {
 
 export const Page = ({ page, getResult }) => {
     const handleSubmit = (e) => {
-        const form = e.target
+        const form = e.target;
         e.preventDefault();
 
         // Clear errors 
@@ -47,7 +47,7 @@ export const Page = ({ page, getResult }) => {
             config.body = {
                 store_in,
                 filters,
-                ...Object.assign(config.body, ...data)
+                ...Object.assign(config.body || {}, ...data)
             }
         }
 
@@ -64,7 +64,7 @@ export const Page = ({ page, getResult }) => {
                         const { field, code } = extensions;
                         if (code != "FORBIDDEN" && elements[field]) elements[field].parentElement.innerHTML += `<span class="input-error">${message}</span>`;
                     });
-                    getResult([]).then((e) => setTimeout(() => createCopy("error", data, form.name), 100));
+                    getResult([]).then((e) => setTimeout(() => createCopy("error", data, form.getAttribute('name')), 100));
                     
                 } else {
 
@@ -73,12 +73,12 @@ export const Page = ({ page, getResult }) => {
                         const [[key, value]] = Object.entries(element);
                         if (!/store_in/.test(key)) elements[key].value = "";
                     });
-                    getResult(response).then((e) => setTimeout(() => createCopy("success", data, form.name), 100));
+                    getResult(response).then((e) => setTimeout(() => createCopy("success", data, form.getAttribute('name')), 100));
                 }
             })
             .catch(error => {
                 console.log(error);
-                createCopy("error", data, form.name).then((e) => setTimeout(() => createCopy("success", data, form.name), 100));
+                setTimeout(() => createCopy("success", data, form.getAttribute('name')), 100);
             });
     }
 
